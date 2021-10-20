@@ -66,6 +66,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>..\..\fmt\include;..\..\zstd\lib;..\..\tomlpp;..\..\lz4\lib;..\thirdparty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -82,6 +83,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>..\..\fmt\include;..\..\zstd\lib;..\..\tomlpp;..\..\lz4\lib;..\thirdparty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -103,7 +105,6 @@
     <ClInclude Include="universal.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\libs\fmt-8.0.1\src\format.cc" />
     <ClCompile Include="compression.cpp" />
     <ClCompile Include="config.cpp" />
     <ClCompile Include="image.cpp" />

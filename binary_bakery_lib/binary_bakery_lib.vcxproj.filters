@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="fmt lib">
-      <UniqueIdentifier>{c6f511da-6c7c-460a-b1f6-9ae4bb3d61da}</UniqueIdentifier>
-    </Filter>
     <Filter Include="decoder">
       <UniqueIdentifier>{f2563080-7c52-4543-aea1-08fb058ba0d0}</UniqueIdentifier>
     </Filter>
@@ -76,9 +73,6 @@
     </ClCompile>
     <ClCompile Include="compression.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\libs\fmt-8.0.1\src\format.cc">
-      <Filter>fmt lib</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

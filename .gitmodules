@@ -1,0 +1,6 @@
+[submodule "thirdparty/stb"]
+	path = thirdparty/stb
+	url = git@github.com:nothings/stb.git
+[submodule "thirdparty/doctest"]
+	path = thirdparty/doctest
+	url = git@github.com:GerHobbelt/doctest.git
