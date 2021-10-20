@@ -1,4 +1,5 @@
 #include <chrono>
+#include <span>
 
 #include <binary_bakery_lib/config.h>
 #include <binary_bakery_lib/file_tools.h>
@@ -86,59 +87,101 @@ namespace bb {
    struct input_files {
       std::vector<abs_file_path> m_packing_files;
       std::optional<config> m_config;
-   };
+
+      void addFile(std::filesystem::path const& filePath) {
+        const abs_file_path file{filePath};
+
+        if (file.get_path().extension() == ".toml") {
+          const std::optional<config> explicit_config = get_cfg_from_file(file);
+          if (explicit_config.has_value()) {
+            if (m_config.has_value()) {
+              fmt::print(
+                  "There was already a config among the input files. Ignoring "
+                  "this one\n");
+              return;
+            }
+            fmt::print("Using explicit config file \"{}\".\n",
+                       file.get_path().string());
+            m_config.emplace(explicit_config.value());
+            return;
+          }
+        }
+
+        auto constexpr skipExtensions = std::array{".h"};
+        if (std::find(begin(skipExtensions), end(skipExtensions),
+                      file.get_path().extension()) != end(skipExtensions)) {
+          fmt::print("Skipping file due to its extension \"{}\".\n",
+                     file.get_path().string());
+          return;
+        }
+        m_packing_files.emplace_back(file);
+      }
+
+      void addDirectory(std::filesystem::path const& dirPath) {
+        auto const dirIterator = std::filesystem::directory_iterator{dirPath};
+        std::for_each(begin(dirIterator), end(dirIterator),
+                      [this](std::filesystem::directory_entry const& entry) {
+                        addPath(entry.path());
+                      });
+      }
+
+      void addPath(std::filesystem::path const& argPath,
+                   bool overrideRecursive = false) {
+        if (is_directory(argPath) == true) {
+          auto const isRecursive = [&overrideRecursive, &config = m_config]() {
+            if (overrideRecursive) {
+              return true;
+            }
+            if (config.has_value()) {
+              return config->recursive;
+            }
+            return false;
+          }();
+          if (isRecursive) {
+            addDirectory(argPath);
+          } else {
+            fmt::print(
+                "Recursive parsing disabled. Path is ignored: {} -> "
+                "skipping.\n",
+                argPath.string());
+          }
+          return;
+        }
+        if (is_regular_file(argPath) == true) {
+          addFile(argPath);
+          return;
+        }
+        fmt::print("Path is not a file: {} -> skipping.\n", argPath.string());
+      }
+    };
 
 
    [[nodiscard]] auto get_input_files(
-      int argc,
-      char* argv[]
+      std::span<char*> const arguments
    ) -> input_files
    {
       input_files result;
-      result.m_packing_files.reserve(argc - 1);
-      for (int i = 1; i < argc; ++i)
-      {
-         // Path must exist and must be a file
-         if (std::filesystem::exists(argv[i]) == false)
-         {
-            fmt::print("Path doesn't exist: {} -> skipping.\n", argv[i]);
-            continue;
-         }
-         if (std::filesystem::is_regular_file(argv[i]) == false)
-         {
-            fmt::print("Path is not a file: {} -> skipping.\n", argv[i]);
-            continue;
-         }
-
-         const abs_file_path file{ argv[i] };
-
-         if (file.get_path().extension() == ".toml")
-         {
-            const std::optional<config> explicit_config = get_cfg_from_file(file);
-            if (explicit_config.has_value())
-            {
-               if (result.m_config.has_value())
-               {
-                  fmt::print("There was already a config among the input files. Ignoring this one\n");
-                  continue;
-               }
-               fmt::print("Using explicit config file \"{}\".\n", file.get_path().string());
-               result.m_config.emplace(explicit_config.value());
-               continue;
-            }
-         }
-         result.m_packing_files.emplace_back(file);
-      }
+      result.m_packing_files.reserve(size(arguments));
+      std::for_each(begin(arguments), end(arguments),
+                [&result](char const* const arg) {
+                  auto const argPath = std::filesystem::path{arg};
+                  // Path must exist and must be a file
+                  if (exists(argPath) == false) {
+                    fmt::print("Path doesn't exist: {} -> skipping.\n", arg);
+                    return;
+                  }
+                  result.addPath(argPath, true);
+                });
       return result;
    }
 
 
    auto run(
-      int argc,
-      char* argv[]
-   ) -> void
+      std::span<char*> const arguments
+   ) -> int
    {
-      const input_files inputs = get_input_files(argc, argv);
+    // Only pass command line arguments, not executable path
+    const input_files inputs = get_input_files(arguments.subspan(1));
       const config cfg = [&]() {
          if (inputs.m_config.has_value())
             return inputs.m_config.value();
@@ -161,6 +204,7 @@ namespace bb {
 
       if (cfg.prompt_for_key)
          wait_for_keypress();
+      return 0;
    }
 }
 
@@ -171,7 +215,5 @@ auto main(
    char* argv[]
 ) -> int
 {
-   bb::run(argc, argv);
-
-   return 0;
+  return bb::run(std::span{argv, static_cast<std::size_t>(argc)});
 }

@@ -17,6 +17,8 @@ namespace bb
       int max_columns = 100;
       compression_mode compression = compression_mode::none;
       bool prompt_for_key = true;
+      bool recursive = false;
+      bool parse_images = true;
       image_vertical_direction image_loading_direction = image_vertical_direction::bottom_to_top;
    };
 

@@ -1,4 +1,4 @@
-#include "config.h"
+#include <binary_bakery_lib/config.h>
 
 #include <algorithm>
 #include <fstream>
@@ -149,6 +149,8 @@ auto bb::get_cfg_from_file(
    set_value(cfg.max_columns, tbl, "max_columns");
    set_value(cfg.compression, tbl, "compression_mode", get_compression_mode);
    set_value(cfg.prompt_for_key, tbl, "prompt_for_key");
+   set_value(cfg.recursive, tbl, "recursive");
+   set_value(cfg.parse_images, tbl, "parse_images");
    set_value(cfg.image_loading_direction, tbl, "image_loading_direction", get_image_write_direction);
    return cfg;
 }
