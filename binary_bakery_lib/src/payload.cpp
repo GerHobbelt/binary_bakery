@@ -274,7 +274,7 @@ auto bb::get_payload(
    const config& cfg
 ) -> payload
 {
-   if (is_image_path(file))
+   if (cfg.parse_images && is_image_path(file))
       return get_image_payload(file, cfg);
    else
       return get_binary_file_payload(file);
